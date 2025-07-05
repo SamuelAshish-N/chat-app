@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>Enter Chat Code</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+  <h2 id="cr">Join Chat Room</h2>
+  <form id="cb" onsubmit="enterChat(event)">
+    <input id="code" placeholder="Enter chat code" required />
+    <button type="submit">Join Chat</button>
+  </form>
+  <!--<button onclick="deleteChat()">Delete Messages</button>-->
+
+  <script>
+    function enterChat(e) {
+      e.preventDefault();
+      const code = document.getElementById('code').value;
+      sessionStorage.setItem('chatCode', code);
+      location.href = '/chat.html';
+    }
+
+    async function deleteChat() {
+      const code = document.getElementById('code').value;
+      if (code) {
+        await fetch(`/messages/${code}`, { method: 'DELETE' });
+        alert('Messages Deleted');
+      }
+    }
+  </script>
+</body>
+</html>

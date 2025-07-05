@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chat</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h2 id="cr">Chat Room</h2>
+  <button onclick="deleteChat()">🗑️ Delete Chat</button>
+
+  <div id="chatBox" style="display: flex; flex-direction: column;"></div>
+  <form id="cm" onsubmit="sendMessage(event)">
+    <input id="msg" autocomplete="off" placeholder="Type a message..." required />
+    <button type="submit">Send</button>
+  </form>
+
+  <script>
+    const socket = io();
+    const room = sessionStorage.getItem('chatCode');
+    const currentUser = sessionStorage.getItem('username'); // store username in session
+
+    fetch('/messages/' + room)
+      .then(res => res.json())
+      .then(data => {
+        data.forEach(m => appendMessage(m.sender, m.text));
+      });
+
+    socket.emit('joinRoom', { room, user: currentUser });
+
+    socket.on('message', msg => {
+      appendMessage(msg.sender, msg.text);
+    });
+
+    function sendMessage(e) {
+      e.preventDefault();
+      const msg = document.getElementById('msg').value;
+      socket.emit('chatMessage', msg);
+      document.getElementById('msg').value = '';
+    }
+
+    function appendMessage(sender, text) {
+  const container = document.createElement('div');
+  container.classList.add('message-container');
+  container.classList.add(sender === currentUser ? 'sender' : 'receiver');
+
+  const senderName = document.createElement('div');
+  senderName.classList.add('sender-name');
+  senderName.textContent = sender;
+
+  const messageBubble = document.createElement('div');
+  messageBubble.classList.add('message-bubble');
+  messageBubble.textContent = text;
+
+  container.appendChild(senderName);
+  container.appendChild(messageBubble);
+
+  document.getElementById('chatBox').appendChild(container);
+}
+
+
+    async function deleteChat() {
+  const confirmDelete = confirm("Are you sure you want to delete all messages in this chat?");
+  if (!confirmDelete) return;
+
+  const room = sessionStorage.getItem('chatCode');
+  if (room) {
+    await fetch(`/messages/${room}`, { method: 'DELETE' });
+    document.getElementById('chatBox').innerHTML = '';
+    alert('Chat history deleted.');
+  }
+}
+
+
+
+
+  </script>
+</body>
+</html>
