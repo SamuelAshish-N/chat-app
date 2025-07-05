@@ -87,6 +87,12 @@ app.delete('/messages/:room', async (req, res) => {
   res.sendStatus(200);
 });
 
+require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 
 server.listen(3000, () => console.log('Server running at http://localhost:3000'));
